@@ -16,31 +16,39 @@ def equiv_to(a, m, low, high):
 
 """ ---------------- PROBLEM 2 ----------------"""
 def b_expansion(n, b):
-    digits = [] # stores the digits of the b-expansion
+    digits = []  # stores the digits of the b-expansion
     q = n
     while q != 0:
-        # FIXME: Initialize digit = ...
-        if b == 16 and digit > 9:
-            hex_dict = {10: 'A', 11 : 'B', 12: 'C', 13: 'D', 14: 'E', 15 : 'F'}
-            # FIXME: Update digit = ...
-        digits.append(digit)
-        # FIXME: Update q = ...
-    return # FIXME: Return the string of digits
-        
+        # Step 1: Divide n by b to obtain n = b * q0 + a0
+        q0, a0 = divmod(q, b)
+        # Step 2: Keep a0 as the rightmost digit in the base b-expansion
+        digits.append(a0)
+        # Step 3: Set n = q0
+        q = q0
+
+    # Convert the digits to their respective characters for bases > 10 (e.g., hexadecimal)
+    if b > 10:
+        for i in range(len(digits)):
+            if digits[i] >= 10:
+                digits[i] = chr(ord('A') + digits[i] - 10)
+
+    # Reverse the list of digits and join them into a string
+    b_expansion_str = ''.join(map(str, reversed(digits)))
+    return b_expansion_str        
 
 """ ---------------- PROBLEM 3 ----------------"""
-def binary_add(a, b): 
-    # removing all whitespace from the strings
+def binary_add(a, b):
+    # Removing all whitespace from the strings
     a = a.replace(' ', '')
     b = b.replace(' ', '')
     
-    # padding the strings with 0's so they are the same length
+    # Padding the strings with 0's so they are the same length
     if len(a) < len(b):
         diff = len(b) - len(a)
-        a = "0" *diff + a
+        a = "0" * diff + a
     elif len(a) > len(b):
         diff = len(a) - len(b)
-        b = "0" *diff + b
+        b = "0" * diff + b
     
     # addition algorithm
     result = ""
@@ -49,31 +57,59 @@ def binary_add(a, b):
         a_i = int(a[i])
         b_i = int(b[i])
     
-        # FIXME: Update result += ....
-        # FIXME: Update carry = 
-    if carry == 1:
-        pass # remove
-        # FIXME: Update result += 
-    return # FIXME return the appropriate string
+        # Calculate the sum of the current digits and the carry
+        sum_ab_carry = a_i + b_i + carry
+        
+        # Append the result digit to the left of the current result
+        result = str(sum_ab_carry % 2) + result
+        
+        # Update the carry for the next iteration
+        carry = sum_ab_carry // 2
 
+    # If there's a carry left, add it to the result
+    if carry == 1:
+        result = '1' + result
+
+    return result
 """ ---------------- PROBLEM 4 ----------------"""
 def binary_mul(a, b):
-    # removing all whitespace from the strings
+    # Removing all whitespace from the strings
     a = a.replace(' ', '')
     b = b.replace(' ', '')
-    
+
     # multiplication algorithm
     partial_products = []
     i = 0 # index of the current binary bit of string 'a' beginning at 0, right-to-left
     for bit in reversed(a):
         if bit == '1':
-          # FIXME: See next line
-          partial_products.append("""FIXME: Append the appropriate partial product""")
+            # FIXME: See next line
+            # Generate the appropriate partial product and append it to the list
+            partial_product = b + "0" * i  # Pad 'b' with zeros
+            partial_products.append(partial_product)
         i += 1
 
+    # Initialize the result to '0' (binary representation)
     result = '0'
+
     while len(partial_products) > 0:
         # FIXME: See next line
-        result = binary_add("FIXME: Input the correct arguments")
+        # Add the current partial product to the result manually
+        current_partial_product = partial_products[0]
+        max_len = max(len(result), len(current_partial_product))
+        result = result.zfill(max_len)
+        current_partial_product = current_partial_product.zfill(max_len)
+        carry = 0
+        temp_result = ""
+        for j in range(max_len - 1, -1, -1):
+            bit_result = int(result[j])
+            bit_current_partial = int(current_partial_product[j])
+            sum_bits = bit_result + bit_current_partial + carry
+            temp_result = str(sum_bits % 2) + temp_result
+            carry = sum_bits // 2
+        if carry:
+            temp_result = "1" + temp_result
+        result = temp_result
         del partial_products[0]
-    return # FIXME: Return the appropriate result 
+
+    # FIXME: See next line
+    return result 
