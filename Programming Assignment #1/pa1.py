@@ -3,12 +3,15 @@ import math
 """ ---------------- PROBLEM 1 ----------------"""
 def equiv_to(a, m, low, high):
     # FIXME: Initialize k_low =
-    k_low = math.floor((low + a - 1) / m)
+    k_low = math.floor((low - a) / m)
     # FIXME: Initialize k_high =
-    k_high = math.floor(high / m)
+    if high >= a:
+        k_high = math.floor((high - a) / m)
+    else:
+        k_high = math.floor((high - a - 1) / m)
     # FIXME: initialize x_vals
     x_vals = []
-    for k in range(k_low, k_high + 1):
+    for k in range(k_low - 1, k_high + 1):
         x = k * m + a;
         if low <= x <= high:
             x_vals.append(x)
@@ -19,23 +22,19 @@ def b_expansion(n, b):
     digits = []  # stores the digits of the b-expansion
     q = n
     while q != 0:
-        # Step 1: Divide n by b to obtain n = b * q0 + a0
-        q0, a0 = divmod(q, b)
-        # Step 2: Keep a0 as the rightmost digit in the base b-expansion
-        digits.append(a0)
-        # Step 3: Set n = q0
-        q = q0
+        digit = q % b
 
-    # Convert the digits to their respective characters for bases > 10 (e.g., hexadecimal)
-    if b > 10:
-        for i in range(len(digits)):
-            if digits[i] >= 10:
-                digits[i] = chr(ord('A') + digits[i] - 10)
+        if b == 16 and digit > 9:
+            hex_dict = {10: 'A', 11: 'B', 12: 'C', 13: 'D', 14: 'E', 15: 'F'}
+            if digit in hex_dict:
+                digit = hex_dict[digit]
 
-    # Reverse the list of digits and join them into a string
+        digits.append(digit)
+
+        q //= b
+
     b_expansion_str = ''.join(map(str, reversed(digits)))
-    return b_expansion_str        
-
+    return b_expansion_str
 """ ---------------- PROBLEM 3 ----------------"""
 def binary_add(a, b):
     # Removing all whitespace from the strings
