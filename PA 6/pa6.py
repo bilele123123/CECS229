@@ -84,6 +84,15 @@ def rank(A: Matrix):
     rank = sum(1 for row in ref_A.rowsp if find_leading_entry(row) != -1)
     return rank
 
+def find_leading_entry(row):
+    """
+    Finds the index of the first non-zero entry in a row.
+    Returns -1 if all entries are zero.
+    """
+    for i, entry in enumerate(row):
+        if entry != 0:
+            return i
+    return -1
 
 """ ----------------- PROBLEM 4 ----------------- """
 
@@ -112,60 +121,49 @@ def gauss_solve(A: Matrix, b: Vec):
     else:
         n = 0
 
-    # Augment the matrix with the column vector b
     for i in range(m):
         matrix.rowsp[i].append(b[i])
 
-    # Perform Gaussian elimination to get the row echelon form
-    for j in range(n):
-        nonzero_row = -1
-        for i in range(j, m):
-            if matrix.rowsp[i][j] != 0:
-                nonzero_row = i
-                break
+    pivot_row = 0
+    free_variables = 0
+
+    for j in range(min(m, n)):
+        nonzero_row = next((i for i in range(pivot_row, m) if matrix.rowsp[i][j] != 0), -1)
 
         if nonzero_row == -1:
-            # The system is either inconsistent or has infinitely many solutions
-            # Check for the case of infinitely many solutions
-            for k in range(j + 1, n):
-                if any(matrix.rowsp[i][k] != 0 for i in range(m)):
-                    return "inf"
+            free_variables += 1
+            continue
 
-            return None  # Inconsistent system
+        matrix.rowsp[pivot_row], matrix.rowsp[nonzero_row] = matrix.rowsp[nonzero_row], matrix.rowsp[pivot_row]
 
-        # Swap rows
-        matrix.rowsp[j], matrix.rowsp[nonzero_row] = matrix.rowsp[nonzero_row], matrix.rowsp[j]
+        pivot_element = matrix.rowsp[pivot_row][j]
+        matrix.rowsp[pivot_row] = [elem / pivot_element for elem in matrix.rowsp[pivot_row]]
 
-        # Make the leading entry of the current row 1
-        pivot_element = matrix.rowsp[j][j]
-        matrix.rowsp[j] = [elem / pivot_element for elem in matrix.rowsp[j]]
+        for i in range(m):
+            if i != pivot_row:
+                factor = matrix.rowsp[i][j]
+                matrix.rowsp[i] = [elem - factor * matrix.rowsp[pivot_row][index] for index, elem in enumerate(matrix.rowsp[i])]
 
-        # Eliminate entries below the pivot
-        for i in range(j + 1, m):
-            factor = matrix.rowsp[i][j]
-            matrix.rowsp[i] = [elem - factor * matrix.rowsp[j][index] for index, elem in enumerate(matrix.rowsp[i])]
+        pivot_row += 1
 
-    # Back substitution
-    for i in range(m - 1, 0, -1):
-        for j in range(i - 1, -1, -1):
-            factor = matrix.rowsp[j][i]
-            matrix.rowsp[j] = [elem - factor * matrix.rowsp[i][index] for index, elem in enumerate(matrix.rowsp[j], 0, 1)]
+        if pivot_row == m:
+            break
 
-    # Extract the solution vector
-    solution = Vec([matrix.rowsp[i][-1] for i in range(m)])
+    for i in range(pivot_row, m):
+        if matrix.rowsp[i][-1] != 0:
+            return None 
 
-    return solution
+    for i in range(m):
+        if all(matrix.rowsp[i][j] == 0 for j in range(n)) and matrix.rowsp[i][-1] != 0:
+            return None 
 
+    solution = Vec([matrix.rowsp[i][-1] for i in range(min(m, n))])
 
-def find_leading_entry(row):
-    """
-    Finds the index of the first non-zero entry in a row.
-    Returns -1 if all entries are zero.
-    """
-    for i, entry in enumerate(row):
-        if entry != 0:
-            return i
-    return -1
+    if pivot_row < n:
+        free_variables += n - pivot_row
+        return free_variables
+    else:
+        return solution 
 
 """ ----------------- PROBLEM 5 ----------------- """
 
